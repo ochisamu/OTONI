@@ -1,0 +1,9 @@
+{
+  "source": "c458cb42ab1ee838bff85c6546e14bb01c3571e9",
+  "models": {
+    "DiffSynth-Studio/DiffSynth-Music": {
+      "revision": "26ba8ebc0c7887db9e96e8eb4ee61eaa4aa52fdb",
+      "directory": "diffsynth-music"
+    }
+  }
+}

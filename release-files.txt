@@ -4,6 +4,7 @@
 .gitignore
 ACE_PROMPT_GUIDE.md
 CONTRIBUTING.md
+CONTROL_PROMPT_GUIDE.md
 LICENSE
 PROMPT_GUIDE.md
 README.ja.md
@@ -19,6 +20,8 @@ audio_storage.py
 codex_bridge.py
 codex_tasks.py
 derivations.py
+diffsynth.lock.json
+docs/CONTROL_MODELS.md
 docs/RELEASE.md
 docs/REPRODUCIBILITY.md
 docs/SECURITY.md
@@ -27,9 +30,12 @@ engines.py
 gpu_lock.py
 language_policy.py
 locks/ace-constraints.txt
+locks/diffsynth-constraints.txt
+locks/mulacover-constraints.txt
 locks/stable-constraints.txt
 locks/yue2-constraints.txt
 models.lock.json
+mulacover.lock.json
 prompting.py
 pytest.ini
 reference_research.py
@@ -40,6 +46,7 @@ schemas.py
 scripts/doctor.py
 scripts/download_ace_lm.py
 scripts/download_ace_models.py
+scripts/download_control_models.py
 scripts/download_models.py
 scripts/download_stable_models.py
 scripts/enable-lan.ps1
@@ -48,6 +55,8 @@ scripts/install_service.py
 scripts/service.sh
 scripts/setup.sh
 scripts/setup_ace.sh
+scripts/setup_diffsynth.sh
+scripts/setup_mulacover.sh
 scripts/setup_stable.sh
 scripts/start.sh
 stable.lock.json
@@ -57,6 +66,7 @@ tempo_metrics.py
 tests/test_album_management.py
 tests/test_app.py
 tests/test_assist_duration.py
+tests/test_control_models.py
 tests/test_language_policy.py
 tests/test_mixed_albums.py
 tests/test_reference_research.py
@@ -81,5 +91,6 @@ web/theme.js
 web/youtube-setup.html
 worker.py
 worker_ace.py
+worker_control.py
 worker_stable.py
 youtube_publish.py

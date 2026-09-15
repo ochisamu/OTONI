@@ -7,7 +7,7 @@ from title_variety import similar_title
 class AlbumInput(BaseModel):
     model_config = ConfigDict(extra='forbid')
     brief: str = Field(min_length=5, max_length=6000)
-    engine: Literal['yue2','ace-xl-turbo','stable-audio-3-medium','mixed'] = 'yue2'
+    engine: Literal['yue2','ace-xl-turbo','stable-audio-3-medium','diffsynth-music','mixed'] = 'yue2'
     track_count: int = Field(default=10, ge=2, le=20)
     duration: int = Field(default=180, ge=30, le=180)
     duration_mode: Literal['fixed','auto'] = 'fixed'
@@ -23,7 +23,7 @@ class AlbumInput(BaseModel):
         return self
 
 class AlbumTrack(BaseModel):
-    engine: Literal['yue2','ace-xl-turbo','stable-audio-3-medium'] | None = None
+    engine: Literal['yue2','ace-xl-turbo','stable-audio-3-medium','diffsynth-music'] | None = None
     engine_reason: str = Field(default='', max_length=500)
     model_config = ConfigDict(extra='forbid')
     title: str = Field(min_length=1, max_length=120)

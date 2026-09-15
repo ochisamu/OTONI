@@ -334,7 +334,7 @@ async def create_song(request: SongInput):
 
 
 class DerivativeDraft(BaseModel):
-    mode: Literal["score", "cover", "timbre"]
+    mode: Literal["score", "cover", "timbre", "diffsynth", "mulacover"]
 
 
 @app.post("/api/songs/{jid}/derive")
@@ -344,13 +344,14 @@ async def derivative_draft(jid: str, options: DerivativeDraft):
         raise HTTPException(400, '完成した曲から派生を作成してください')
     data = json.loads((JOBS/jid/'input.json').read_text())
     score = options.mode == 'score'
-    data.update(engine='yue2' if score else 'ace-xl-turbo', ace_lm='none',
-        source_song_id=jid, derivation_mode=options.mode, reference_strength=0.8,
+    control=options.mode in ('diffsynth','mulacover')
+    data.update(engine=('diffsynth-music' if options.mode=='diffsynth' else 'mulacover') if control else 'yue2' if score else 'ace-xl-turbo', ace_lm='none',
+        source_song_id=jid, derivation_mode='control' if control else options.mode, control_mode='reference' if control else 'native', duration_mode='fixed', reference_strength=0.8,
         title=original['title'][:100]+'・別テイク', album_title='', track_number=None,
         abc='', cot='full', cfg_scale=None, auto_assist=True, reference_track='',
         brief='元曲の良いところを保ち、編成や音色を調整した別テイクを作る。変更したい点：',
         seed=secrets.randbelow(2147483648))
-    if not score and len(data['lyrics']) > 4096:
+    if not score and not control and len(data['lyrics']) > 4096:
         raise HTTPException(400, 'ACE-Step用には歌詞が長すぎます。YuE2の譜面派生を使うか、歌詞を短くした入力から作成してください')
     if options.mode == 'timbre':
         data.update(lyrics='', brief='元曲の音色・ミックス・雰囲気を参考に、新しい旋律と歌詞の曲を作る。変更したい点：')

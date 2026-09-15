@@ -1,0 +1,23 @@
+{
+  "source": "315d653bc9a4383859525f7c9187ece669cf6fe8",
+  "models": {
+    "HeartMuLa/MuLaCover": {
+      "revision": "bbbaef2b31835c2ef5172ff528dbe325230d46fb",
+      "directory": "mulacover/MuLaCover"
+    },
+    "Qwen/Qwen3-Embedding-0.6B": {
+      "revision": "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
+      "directory": "mulacover/Qwen3-Embedding-0.6B"
+    },
+    "HeartMuLa/HeartCodec-oss-20260123": {
+      "revision": "f889dab0532cfa4bf459f2a3367eb6d346b8eeda",
+      "directory": "mulacover/HeartCodec-oss"
+    }
+  },
+  "transcriptor": {
+    "repo": "mimbres/YourMT3",
+    "revision": "5e66c1ea173a8186e0d20432b841d3180cc015b5",
+    "file": "amt/logs/2024/mc13_256_g4_all_v7_mt3f_sqr_rms_moe_wf4_n8k2_silu_rope_rp_b36_nops/checkpoints/last.ckpt"
+  },
+  "chord_revision": "481f4ce703f8822b99f4037e9104ba1760e21ea3"
+}

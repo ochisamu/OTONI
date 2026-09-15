@@ -63,7 +63,7 @@ async def render_video(manager, aid):
             output.replace(folder/'youtube.mp4')
             description=f'{item["title"]}\n\n{item["plan"]["concept"]}\n\nTRACKLIST\n'+ '\n'.join(chapters)
             engines=list(dict.fromkeys(manager.s.jobs[jid].get('engine',item['request']['engine']) for i,jid in enumerate(item['song_ids']) if i not in item.get('deleted_tracks',[]) and jid))
-            names={'yue2':'YuE2','ace-xl-turbo':'ACE-Step','stable-audio-3-medium':'Stable Audio 3 Medium'}
+            names={'yue2':'YuE2','ace-xl-turbo':'ACE-Step','stable-audio-3-medium':'Stable Audio 3 Medium','diffsynth-music':'DiffSynth Music','mulacover':'MuLaCover'}
             description+='\n\nMusic created with '+', '.join(names.get(e,e) for e in engines)+' / OTONI\n'
             (folder/'youtube-description.txt').write_text(description)
             item.update(video_status='completed',video_seconds=duration,video_bytes=(folder/'youtube.mp4').stat().st_size)

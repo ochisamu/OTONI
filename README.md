@@ -22,6 +22,8 @@ A local music creation workspace: develop an idea, generate music on your GPU, a
 | YuE2-3B | Vocals, experimental instrumentals, ABC score planning | Approximate arrangement target; no exact duration guarantee | `.venv` |
 | ACE-Step 1.5 XL Turbo | Vocals, instrumentals, audio-based variations | Fixed 10–180 seconds / automatic 30–180 seconds | `.venv-ace` |
 | Stable Audio 3 Medium | Instrumentals only | Fixed 10–180 seconds / automatic 30–180 seconds | `.venv-stable` |
+| DiffSynth Music | Native generation, beats and audio conditioning | Fixed 10–180 seconds / automatic 30–180 seconds | `.venv-diffsynth` |
+| MuLaCover | Covers from completed library tracks | 10–180 second generation ceiling | `.venv-mulacover` |
 
 These are application limits, not the models' maximum capabilities. All models share a GPU queue and run **one track at a time**. Requested BPM, vocal character, genre, and lyrics are not guaranteed to match the generated audio exactly.
 
@@ -112,7 +114,7 @@ See the [setup guide (Japanese)](docs/SETUP.md) for LAN access, YouTube setup, a
 
 ## Storage and reproducibility
 
-Expect tens of gigabytes for models, environments, and download caches. Approximate model storage is 7.3GB for YuE2, an additional 21GB for ACE-Step, and an additional 9.8GB for Stable Audio. Python environments, caches, tracks, and videos need more space. Plan around 100GB of free space for all models as a rough starting point, then check actual usage.
+Expect tens of gigabytes for models, environments, and download caches. Approximate model storage is 7.3GB for YuE2, an additional 21GB for ACE-Step, and an additional 9.8GB for Stable Audio. Python environments, caches, tracks, and videos need more space. DiffSynth adds approximately 34GB and MuLaCover with its supporting models approximately 17GB. For all five models, plan around 150–200GB of free space as a rough starting point and check actual usage, especially download caches.
 
 Model/source revisions and dependency records are included in `*.lock.json`, `locks/`, and `vendor/SHA256SUMS`. The [reproducibility guide (Japanese)](docs/REPRODUCIBILITY.md) describes how each setup uses them and what remains unverified.
 
@@ -147,3 +149,7 @@ OTONI does not grant blanket permission or guarantees for publishing or commerci
 [Contributing (Japanese)](CONTRIBUTING.md) · [Release checklist (Japanese)](docs/RELEASE.md)
 
 For bug reports, include your OS, GPU, selected model, and steps to reproduce the error. Do not attach `.env`, authentication files, or entire folders of personal lyrics and generated music.
+
+## DiffSynth Music / MuLaCover
+
+DiffSynth Music adds native generation and audio conditioning; MuLaCover adds covers from library tracks. See [setup, usage and model terms](docs/CONTROL_MODELS.md).

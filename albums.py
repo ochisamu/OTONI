@@ -88,7 +88,7 @@ class AlbumManager:
     async def create(self, request):
         if sum(x['status'] in ('planning','generating') for x in self.items.values())>=2:
             raise HTTPException(429,'同時に処理するアルバムは2枚までです')
-        available=[engine for engine,status in self.s.engine_status(self.s.ROOT).items() if status['ready'] and (request.vocal_mode!='vocal' or engine!='stable-audio-3-medium')]
+        available=[engine for engine,status in self.s.engine_status(self.s.ROOT).items() if status['ready'] and engine!='mulacover' and (request.vocal_mode!='vocal' or engine!='stable-audio-3-medium')]
         if request.engine=='mixed':
             if len(available)<2: raise HTTPException(503,'混在には利用可能なモデルが2つ以上必要です')
         elif request.engine not in available: raise HTTPException(503,'モデルの準備が必要です')
@@ -129,7 +129,7 @@ class AlbumManager:
                 for attempt in range(2):
                     instructions=PLAN_INSTRUCTIONS
                     if request.engine=='mixed':
-                        instructions+='\nAssign each track an engine from available_engines and explain the choice in engine_reason. Use at least two different models. Choose by musical role and requested control: YuE2 uses a symbolic melody/harmony plan; ACE-Step supports vocals and instrumental tracks with numeric duration/BPM conditioning; Stable Audio 3 is instrumental-only with numeric duration and text tempo guidance. These interfaces do not guarantee superior quality for a genre. Preserve album cohesion. Never assign Stable Audio to a vocal track.\n'
+                        instructions+='\nAssign each track an engine from available_engines and explain the choice in engine_reason. Use at least two different models. Choose by musical role and requested control: YuE2 uses a symbolic melody/harmony plan; ACE-Step supports vocals and instrumental tracks with numeric duration/BPM conditioning; Stable Audio 3 is instrumental-only with numeric duration and text tempo guidance. DiffSynth Music supports native text/lyrics generation with numeric BPM and duration; assign it to suitable original tracks. These interfaces do not guarantee superior quality for a genre. Preserve album cohesion. Never assign Stable Audio to a vocal track.\n'
                     else:
                         instructions+='\nUse the requested engine for every track; engine_reason can be empty.\n'
                     if request.engine in ('stable-audio-3-medium','mixed'):

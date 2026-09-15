@@ -10,6 +10,8 @@ ACE_GUIDE_URL = f"https://github.com/ace-step/ACE-Step-1.5/blob/{ACE_GUIDE_REVIS
 def engine_status(root: Path):
     """Report readiness separately, so either engine can work without the other."""
     return {
+        "diffsynth-music": {"label":"DiffSynth Music", "ready":(root/"models/diffsynth-music/.ready").is_file() and (root/".venv-diffsynth/bin/python").is_file(), "precision":"BF16 / CPU offload", "duration_min":10, "duration_max":180},
+        "mulacover": {"label":"MuLaCover", "ready":(root/"models/mulacover/.ready").is_file() and (root/".venv-mulacover/bin/python").is_file(), "precision":"BF16 / lazy load", "reference_required":True, "noncommercial":True},
         "stable-audio-3-medium": {"label":"Stable Audio 3 Medium", "ready":
             (root/"models/stable-audio-3-medium/.ready").is_file() and (root/".venv-stable/bin/python").is_file(),
             "precision":"FP16 / chunked decode", "duration_min":10, "duration_max":180,
@@ -27,6 +29,9 @@ def engine_status(root: Path):
 
 def worker_command(root: Path, engine: str, folder: Path):
     """Keep dependency sets and GPU lifetimes isolated while sharing one queue."""
+    if engine in ("diffsynth-music", "mulacover"):
+        environment = ".venv-diffsynth" if engine == "diffsynth-music" else ".venv-mulacover"
+        return [str(root/environment/"bin/python"), "-u", str(root/"worker_control.py"), str(folder)]
     if engine == "stable-audio-3-medium":
         return [str(root / ".venv-stable/bin/python"), "-u", str(root / "worker_stable.py"), str(folder)]
     if engine == "ace-xl-turbo":

@@ -40,6 +40,7 @@ checks. Mention that limitation briefly only when relevant. No artist-name short
 actual musical qualities. Output only the requested JSON object.
 """
 INSTRUCTIONS += "\nThe following reviewed guide refines the above instructions:\n" + (ROOT / "PROMPT_GUIDE.md").read_text()
+CONTROL_INSTRUCTIONS = (ROOT / "CONTROL_PROMPT_GUIDE.md").read_text()
 STABLE_INSTRUCTIONS = (ROOT / "STABLE_AUDIO_GUIDE.md").read_text()
 ACE_INSTRUCTIONS = (ROOT / "ACE_PROMPT_GUIDE.md").read_text() + "\n## Reference songs\n" + (ROOT / "PROMPT_GUIDE.md").read_text().split("## Reference songs:", 1)[1]
 
@@ -139,7 +140,7 @@ class CodexBridge:
             research = reference_research if reference_research is not None else (await self.research_reference(request) if request.reference_track.strip() else None)
             params = {"cwd": str(ROOT / "work"), "ephemeral": True,
                       "sandbox": "read-only", "approvalPolicy": "never",
-                      "baseInstructions": (STABLE_INSTRUCTIONS if request.engine == "stable-audio-3-medium" else ACE_INSTRUCTIONS if request.engine == "ace-xl-turbo" else INSTRUCTIONS) + TITLE_INSTRUCTIONS + LANGUAGE_INSTRUCTIONS + "\nReturn bpm as a concrete integer matching the primary requested genre, groove and tempo; use null only for deliberately unmetered music. Preserve choices.bpm exactly when supplied. A tempo category is a broad constraint, not a reason to omit bpm. Explain the rhythmic choice briefly. Return duration in seconds. If duration_mode is auto, choose 30-180 seconds appropriate for the requested song, lyrics and arrangement, not a default fixed length. The duration input is null in auto mode; 180 is only an upper limit, not a target. First estimate useful section/bar counts at the chosen BPM including intro/outro, then pick the seconds needed. Do not expand every song to use the full budget. Return duration_reason describing section counts and the duration calculation. For a deliberately full 180-second song explain why that much time is needed. Include a resolved outro within the final 10-15 seconds in the style and make the lyrical structure fit. Explain the selected duration briefly in Japanese. If duration_mode is fixed, return the supplied duration unchanged.",
+                      "baseInstructions": (CONTROL_INSTRUCTIONS if request.engine in ("diffsynth-music", "mulacover") else STABLE_INSTRUCTIONS if request.engine == "stable-audio-3-medium" else ACE_INSTRUCTIONS if request.engine == "ace-xl-turbo" else INSTRUCTIONS) + TITLE_INSTRUCTIONS + LANGUAGE_INSTRUCTIONS + "\nReturn bpm as a concrete integer matching the primary requested genre, groove and tempo; use null only for deliberately unmetered music. Preserve choices.bpm exactly when supplied. A tempo category is a broad constraint, not a reason to omit bpm. Explain the rhythmic choice briefly. Return duration in seconds. If duration_mode is auto, choose 30-180 seconds appropriate for the requested song, lyrics and arrangement, not a default fixed length. The duration input is null in auto mode; 180 is only an upper limit, not a target. First estimate useful section/bar counts at the chosen BPM including intro/outro, then pick the seconds needed. Do not expand every song to use the full budget. Return duration_reason describing section counts and the duration calculation. For a deliberately full 180-second song explain why that much time is needed. Include a resolved outro within the final 10-15 seconds in the style and make the lyrical structure fit. Explain the selected duration briefly in Japanese. If duration_mode is fixed, return the supplied duration unchanged.",
                       "config": {"web_search": "disabled"}}
             if request.model:
                 params["model"] = request.model
@@ -185,8 +186,8 @@ class CodexBridge:
                                 raise ValueError("ACE-Stepの歌詞は4096文字以内です。歌詞を短くして再実行してください。")
                             return {**result.model_dump(), "engine": request.engine,
                                     "reference_research": research,
-                                    "guide_revision": "2026-09-15" if request.engine == "stable-audio-3-medium" else ACE_GUIDE_REVISION if is_ace else GUIDE_REVISION,
-                                    "guide_url": STABLE_GUIDE if request.engine == "stable-audio-3-medium" else ACE_GUIDE_URL if is_ace else GUIDE_URL}
+                                    "guide_revision": "2026-09-16" if request.engine in ("diffsynth-music","mulacover") else "2026-09-15" if request.engine == "stable-audio-3-medium" else ACE_GUIDE_REVISION if is_ace else GUIDE_REVISION,
+                                    "guide_url": ("https://github.com/HeartMuLa/MuLaCover/blob/main/examples/cover_song_generation.md" if request.engine=="mulacover" else "https://github.com/modelscope/DiffSynth-Studio/tree/main/examples/diffsynth_music") if request.engine in ("diffsynth-music","mulacover") else STABLE_GUIDE if request.engine == "stable-audio-3-medium" else ACE_GUIDE_URL if is_ace else GUIDE_URL}
             except (TimeoutError, asyncio.CancelledError):
                 if turn_id:
                     try:

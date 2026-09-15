@@ -40,5 +40,8 @@ def snapshot_source(folder,request,source):
         try:os.link(path,folder/name)
         except OSError:shutil.copy2(path,folder/name)
         record['audio_file']=name
+        if request.engine=='diffsynth-music' and request.control_mode=='vocals':
+            original=json.loads((origin/'input.json').read_text())
+            request=request.model_copy(update={'lyrics':original.get('lyrics','')})
     (folder/'derivation.json').write_text(json.dumps(record,ensure_ascii=False,indent=2))
     return request

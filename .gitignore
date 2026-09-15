@@ -25,3 +25,9 @@ dist/
 *.pem
 *.key
 .DS_Store
+
+.venv-diffsynth/
+.venv-mulacover/
+vendor/DiffSynth-Studio/
+vendor/MuLaCover/
+vendor/heartlib/

@@ -16,3 +16,5 @@ OTONI独自コードは [MIT License](LICENSE) です。第三者のコード・
 | Codex | https://learn.chatgpt.com/docs/app-server | サービスとCLIの利用条件を確認 |
 
 プロンプトガイドには参照した公式文書・revisionと、アプリ側の作曲方針を記載しています。上流の変更を取り込む場合は、技術的な互換性だけでなく通知・利用条件も再確認してください。
+
+DiffSynth MusicとMuLaCover、および付属の音声解析・エンコーダー・コーデックの取得元は [追加モデル案内](docs/CONTROL_MODELS.md) と `diffsynth.lock.json` / `mulacover.lock.json` を参照してください。MuLaCoverの重み・生成物には公式の非商用条件があります。

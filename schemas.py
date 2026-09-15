@@ -15,10 +15,10 @@ class MusicChoices(BaseModel):
 
 class SongInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    engine: Literal["yue2", "ace-xl-turbo", "stable-audio-3-medium"] = "yue2"
+    engine: Literal["yue2", "ace-xl-turbo", "stable-audio-3-medium", "diffsynth-music", "mulacover"] = "yue2"
     ace_lm: Literal["none", "1.7B"] = "none"
     source_song_id: str = Field(default="", pattern=r"^(?:[a-f0-9]{16})?$")
-    derivation_mode: Literal["none", "score", "cover", "timbre"] = "none"
+    derivation_mode: Literal["none", "score", "cover", "timbre", "control"] = "none"
     reference_strength: float = Field(default=0.8, ge=0.0, le=1.0)
     duration: int = Field(default=60, ge=10, le=180)
     duration_mode: Literal["fixed", "auto"] = "fixed"
@@ -33,6 +33,7 @@ class SongInput(BaseModel):
     cfg_scale: float | None = Field(default=None, ge=0.5, le=2.0)
     max_tokens: int = Field(default=9000, ge=200, le=9000)
     abc: str = Field(default="", max_length=30000)
+    control_mode: Literal["native", "beats", "vocals", "accompany", "prosody", "reference"] = "native"
     auto_assist: bool = False
     brief: str = Field(default="", max_length=6000)
     language: LyricLanguage = "日本語"
@@ -42,6 +43,20 @@ class SongInput(BaseModel):
 
     @model_validator(mode="after")
     def score_mode(self):
+        if self.engine in ("diffsynth-music", "mulacover"):
+            if self.abc.strip() or self.cfg_scale is not None or self.ace_lm != "none":
+                raise ValueError("このモデルではABC・YuE CFG・ACE LMを使用しません")
+            self.cot = "off"
+            if self.engine == "mulacover" and (self.derivation_mode != "control" or not self.source_song_id):
+                raise ValueError("MuLaCoverは完成した元曲を選択してください")
+            if self.engine == "diffsynth-music":
+                needs_source = self.control_mode not in ("native", "beats")
+                if needs_source != (self.derivation_mode == "control"):
+                    raise ValueError("音声制御には元曲を選択してください。通常・ビート制御では元曲を解除してください")
+            if self.derivation_mode not in ("none", "control"):
+                raise ValueError("このモデルには専用の音声制御を使用してください")
+        elif self.derivation_mode == "control" or self.control_mode != "native":
+            raise ValueError("音声制御はDiffSynth Music / MuLaCover用です")
         if self.engine == "stable-audio-3-medium":
             if self.derivation_mode != "none" or self.abc.strip() or self.cfg_scale is not None or self.ace_lm != "none":
                 raise ValueError("Stable Audio 3では通常のインスト生成を選んでください。ABC・派生・ACE LMは使用しません")
@@ -51,7 +66,7 @@ class SongInput(BaseModel):
             self.lyrics = "[Instrumental]"
             self.cot = "off"
         if self.duration_mode == "auto":
-            if self.engine not in ("ace-xl-turbo", "stable-audio-3-medium") or self.derivation_mode == "cover":
+            if self.engine not in ("ace-xl-turbo", "stable-audio-3-medium", "diffsynth-music") or self.derivation_mode == "cover":
                 raise ValueError("曲長おまかせはACE-Step・Stable Audio 3の通常生成などで利用できます")
             self.auto_assist = True
         if bool(self.source_song_id) != (self.derivation_mode != "none"):
@@ -77,7 +92,7 @@ class SongInput(BaseModel):
 
 class AssistInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    engine: Literal["yue2", "ace-xl-turbo", "stable-audio-3-medium"] = "yue2"
+    engine: Literal["yue2", "ace-xl-turbo", "stable-audio-3-medium", "diffsynth-music", "mulacover"] = "yue2"
     duration: int = Field(default=60, ge=10, le=180)
     duration_mode: Literal["fixed", "auto"] = "fixed"
     brief: str = Field(min_length=3, max_length=6000)

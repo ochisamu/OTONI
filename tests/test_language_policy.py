@@ -8,7 +8,7 @@ from language_policy import LANGUAGE_INSTRUCTIONS, VOCAL_LANGUAGE_CODES
 from albums import PLAN_INSTRUCTIONS
 
 
-@pytest.mark.parametrize('engine', ['yue2', 'ace-xl-turbo'])
+@pytest.mark.parametrize('engine', ['yue2', 'ace-xl-turbo', 'diffsynth-music', 'mulacover'])
 def test_mixed_language_reaches_composer_and_preserves_existing_lyrics(engine):
     async def scenario():
         bridge = CodexBridge()
