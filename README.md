@@ -1,77 +1,149 @@
-# OTONI（オトニ）
+# OTONI
 
-日本語で曲のイメージを考え、ローカルGPUで生成し、アルバムとして聴くための音楽生成支援ツールです。YuE2・ACE-Step・Stable Audioを同じライブラリで扱います。OTONI自体は音楽生成モデルを提供せず、各モデルの入力・実行・生成物の管理を支援します。
+**English** | [日本語](README.ja.md)
 
-**Windows + WSL2 + NVIDIA GPU向けの実験的な個人用アプリです。** 音声生成はローカルで動きます。Codexによる作詞・構成・参考情報の調査・ジャケット生成には、ネット接続とChatGPTでのCodexログインが必要です。完全オフラインのAI作詞ツールではありません。
+A local music creation workspace: develop an idea, generate music on your GPU, and listen to it as an album. OTONI brings YuE2, ACE-Step, and Stable Audio into one library. It is a **music generation assistance tool**, not a music generation model: it helps prepare inputs, run models, and manage their outputs.
 
-## できること
+**An experimental personal application for Windows + WSL2 + an NVIDIA GPU.** Audio generation runs locally. Codex-assisted lyrics, arrangements, reference research, and cover artwork require an internet connection and a ChatGPT login for Codex. These assistance features do not run offline. The application UI and most detailed guides are currently in Japanese; this English README does not change the UI language.
 
-- 単曲とアルバムの生成。曲ごとにモデルを選ぶ「おまかせ混在」も利用可能
-- ジャンル・BPM・歌声・長さを指定し、Codexでモデル別のプロンプトを設計
-- 日本語、英語、中国語、日本語中心＋短い英語フレーズの歌詞
-- インスト、生成済みの曲からの派生、生成条件・歌詞の閲覧
-- M4A/FLAC保存、共通プレイヤー、シャッフル、スマホ対応、ダークテーマ
-- ジャケットと曲名が切り替わるYouTube用動画の作成、任意のYouTube接続
+## Features
 
-## モデルと動作範囲
+- Generate individual tracks or albums, including albums that use different models for different tracks
+- Set genre, BPM, vocals, and duration; use Codex to draft prompts tailored to each model
+- Lyrics in Japanese, English, Chinese, or primarily Japanese with short English phrases
+- Instrumental tracks, variations of your generated music, and readable lyrics and generation settings
+- M4A/FLAC storage, a shared player, shuffle, mobile layouts, and dark mode
+- YouTube-ready album videos with cover artwork and track titles that change with the music; optional YouTube upload integration
 
-| モデル | アプリでの用途 | 曲長の指定 | 追加環境 |
+## Models and application limits
+
+| Model | Use in OTONI | Duration controls | Environment |
 |---|---|---|---|
-| YuE2-3B | 歌声・実験的なインスト、ABC譜面による構成 | 目安。秒数の保証なし | `.venv` |
-| ACE-Step 1.5 XL Turbo | 歌声・インスト、音源からの派生 | 固定10〜180秒／おまかせ30〜180秒 | `.venv-ace` |
-| Stable Audio 3 Medium | インスト専用 | 固定10〜180秒／おまかせ30〜180秒 | `.venv-stable` |
+| YuE2-3B | Vocals, experimental instrumentals, ABC score planning | Approximate arrangement target; no exact duration guarantee | `.venv` |
+| ACE-Step 1.5 XL Turbo | Vocals, instrumentals, audio-based variations | Fixed 10–180 seconds / automatic 30–180 seconds | `.venv-ace` |
+| Stable Audio 3 Medium | Instrumentals only | Fixed 10–180 seconds / automatic 30–180 seconds | `.venv-stable` |
 
-上限はアプリ側の設定です。モデル本来の最大長とは異なります。GPU処理は全モデル共通で**1曲ずつ**進みます。入力したBPM・声質・ジャンル・歌詞が期待どおり音に反映される保証はありません。
+These are application limits, not the models' maximum capabilities. All models share a GPU queue and run **one track at a time**. Requested BPM, vocal character, genre, and lyrics are not guaranteed to match the generated audio exactly.
 
-## 最初のセットアップ
+## Getting started
 
-動作確認環境は **WSL2 Ubuntu 22.04、RTX 5060 Ti 16GB、Windows側ドライバー591.86、Python 3.12.11** です。macOS、AMD、CPUのみ、Windowsネイティブでは検証していません。別GPUでの最低VRAMも未検証です。
+Tested on **WSL2, Ubuntu 22.04, RTX 5060 Ti 16GB, Windows NVIDIA driver 591.86, and Python 3.12.11**. macOS, AMD GPUs, CPU-only audio generation, and native Windows execution have not been tested. Minimum VRAM requirements for other GPUs have not been established.
 
-次のコマンドでリポジトリを取得し、そのディレクトリで実行します。
-
-```bash
-git clone https://github.com/ochisamu/OTONI.git
-cd OTONI
-```
-
-WSLのLinuxファイルシステム上（例：`~/workspace/otoni`）を使用してください。以下の手順は最初に共通環境とYuE2を導入します。ACE/Stableだけを使う場合でも、現状のセットアップには共通のYuE2環境が必要です。
+Use the WSL Linux filesystem, for example `~/workspace/OTONI`. Install the OS packages and [uv](https://docs.astral.sh/uv/getting-started/installation/) first:
 
 ```bash
 sudo apt update
 sudo apt install -y git curl ffmpeg fonts-ipafont-gothic
-# uvを公式手順でインストールしてから続けます。
+# Install uv using its official instructions before continuing.
 nvidia-smi
+
+git clone https://github.com/ochisamu/OTONI.git
+cd OTONI
 cp .env.example .env
 ./scripts/setup.sh
 ./scripts/start.sh
 ```
 
-[uvのインストール手順](https://docs.astral.sh/uv/getting-started/installation/)を参照してください。WSL内へLinux用ディスプレイドライバーを追加する手順は含めていません。
+The setup installs the shared environment **and YuE2**. Currently this shared YuE2 environment is also required when you only intend to use ACE-Step or Stable Audio. The instructions do not install a separate Linux display driver inside WSL.
 
-ブラウザで **http://localhost:7860** を開きます。ターミナルを閉じると停止します。バックグラウンド起動、追加モデル、Codexログインは **[導入ガイド](docs/SETUP.md)** を参照してください。
+Open **http://localhost:7860**. Keep the terminal open; press Ctrl+C to stop. Do not overwrite an existing `.env` when updating an installation.
 
-最初は単曲生成で「生成前にCodexで整える」をOFFにして英語サンプルを入力し、YuE2で1曲作ると、認証とGPUの問題を分けて確認できます。アルバムの自動構成にはCodexが必要です。
+For a first GPU check without Codex, open single-track creation, disable automatic Codex assistance, load the English song sample, and generate with YuE2. Automatic album planning requires Codex.
 
-## 容量と再現性
+### Additional models
 
-モデル・仮想環境・ダウンロードキャッシュで数十GBを使用します。目安はYuE2の重み約7.3GB、ACE追加約21GB、Stable追加約9.8GB。さらに各Python環境、キャッシュ、曲、動画の空き容量が必要です。全モデル導入時は100GB程度の空きを計画上の目安にし、実際の消費量を確認してください。
+After the shared setup:
 
-ソース・重みのrevision、Python依存関係の記録、テスト方法、再現できない部分は **[再現性と検証](docs/REPRODUCIBILITY.md)** にまとめています。既存PCでの動作確認と、別PCでのクリーンインストール確認を区別しています。同じseedでも別環境やCodexによる再提案で同一音声になるとは限りません。
+```bash
+# ACE-Step 1.5 XL Turbo, in its own environment
+./scripts/setup_ace.sh
 
-## データ・接続・利用条件
+# Stable Audio: first accept the model's access conditions on Hugging Face,
+# then sign in using the shared environment's CLI.
+.venv/bin/hf auth login
+./scripts/setup_stable.sh
+```
 
-生成した音声・歌詞・設定は通常 `data/`、モデルは `models/`、一時ファイルは `work/` に置きます。リポジトリには含めません。バックアップするときは音声だけでなく `data/` を保存してください（YouTube接続情報も含まれるため取扱いに注意）。M4A/FLACへの変換後は検証を経て重複WAVを削除します。削除操作には元に戻す機能がありません。
+Accept access conditions at the [official Stable Audio model page](https://huggingface.co/stabilityai/stable-audio-3-medium) using the same account as the CLI. Enter tokens interactively; do not put them in source files or Issues. Stable Audio uses the local Medium model, not the Large cloud API. Refresh the page after installing a model.
 
-LAN公開は任意です。複数ユーザーのログイン・権限分離を備えていないため、インターネットへ直接公開するサーバー用途は想定していません。詳細は [接続とデータ](docs/SECURITY.md) を参照してください。
+### Codex assistance
 
-OTONIは生成支援ツールです。**モデルの利用条件は、利用する各モデルの公式ライセンス・モデルカード・付属通知を参照してください。** モデル重み・推論wheel・外部リポジトリは同梱せず、導入時に公式配布元から取得します。参照先は [第三者コンポーネント](THIRD_PARTY_NOTICES.md) にまとめています。
+Install a Linux/WSL-compatible Codex using the [official setup instructions](https://learn.chatgpt.com/docs/quickstart). Verify `codex --version` and `codex app-server --help`. If it is not on PATH, set `YUE_CODEX_BIN` in `.env` to the executable's absolute path. Use the connection button at the top of the app to sign in with ChatGPT. OTONI uses Codex App Server; API-key-based songwriting is not implemented.
 
-生成した音楽の公開・商用利用などについて、OTONIが一律に許可や保証を与えるものではありません。利用するモデルや関連サービスの条件、入力素材・生成物に関する権利を利用者が確認してください。モデルのライセンスがそのまま生成物へ適用されると一律に扱うものでもありません。
+Prompts, lyrics, styles, and reference descriptions are sent to Codex and consume its usage allowance. Available models, web search, and cover generation depend on your Codex version and account. The tested CLI version is `0.154.0-alpha.6.2`; compatibility with every public CLI release is not guaranteed. See the official [authentication](https://learn.chatgpt.com/docs/auth) and [App Server](https://learn.chatgpt.com/docs/app-server) documentation.
 
-OTONI独自コードは **[MIT License](LICENSE)** で公開します。モデル・外部コンポーネントの利用条件とは別です。
+### Background operation
 
-## 開発・報告
+If WSL user systemd is available:
 
-[開発ガイド](CONTRIBUTING.md) ／ [公開前チェック](docs/RELEASE.md)
+```bash
+./scripts/service.sh start
+./scripts/service.sh status
+./scripts/service.sh logs
+# Wait for generation to finish before restarting or stopping.
+./scripts/service.sh restart
+./scripts/service.sh stop
+```
 
-不具合報告には、OS・GPU・モデル・エラーの再現手順を記載してください。`.env`、認証ファイル、個人の歌詞や生成物を丸ごと添付しないでください。
+The script generates and enables a user service for the current checkout. The unit retains the name `yue2-studio.service`. WSL startup and user service startup depend on your system configuration. To disable automatic service startup, run `systemctl --user disable --now yue2-studio.service`. Without user systemd, use `./scripts/start.sh`.
+
+### Launch and generate your first track
+
+Run these commands in the checkout directory after setup (stop any foreground instance with Ctrl+C first):
+
+```bash
+# In a new terminal, navigate to wherever you cloned OTONI, for example:
+cd ~/workspace/OTONI
+./scripts/start.sh
+```
+
+If you cloned elsewhere, use that path. Once the terminal reports that Uvicorn is running, open **http://localhost:7860** in your Windows browser. Keep this terminal open. Use either this foreground command or the systemd service above, not both at once.
+
+1. Open **曲をつくる** (create music) and select an installed model.
+2. For a first YuE2 test, load the English sample and turn off **生成前にCodexでメロディー・構成を整える** (automatic Codex assistance). This path does not require ChatGPT login.
+3. Click **曲を生成** (generate). Generation is queued and runs one track at a time; the first run may take longer while the model loads.
+4. Open **すべての曲** (all tracks). When the track is complete, play it or open its details to inspect lyrics and settings.
+
+For assisted songwriting or automatic albums, connect ChatGPT first and enable assistance. For Stable Audio, select instrumental generation; it does not generate sung lyrics through this app.
+
+Stop a foreground server with **Ctrl+C**, preferably after generation finishes. To stop a background service, use `./scripts/service.sh stop`. To launch again, repeat the corresponding start command. Closing only the browser does not stop the server or its queue.
+
+See the [setup guide (Japanese)](docs/SETUP.md) for LAN access, YouTube setup, and troubleshooting.
+
+## Storage and reproducibility
+
+Expect tens of gigabytes for models, environments, and download caches. Approximate model storage is 7.3GB for YuE2, an additional 21GB for ACE-Step, and an additional 9.8GB for Stable Audio. Python environments, caches, tracks, and videos need more space. Plan around 100GB of free space for all models as a rough starting point, then check actual usage.
+
+Model/source revisions and dependency records are included in `*.lock.json`, `locks/`, and `vendor/SHA256SUMS`. The [reproducibility guide (Japanese)](docs/REPRODUCIBILITY.md) describes how each setup uses them and what remains unverified.
+
+Audio generation has been verified on the development machine. **A complete clean installation and GPU generation on another PC have not been verified.** The application tests run without model weights or credentials. Passing those tests does not establish GPU compatibility or musical quality.
+
+To run the application tests without GPU dependencies, install FFmpeg and the IPA fonts above, then:
+
+```bash
+uv venv --python 3.12 .venv-test
+uv pip install --python .venv-test/bin/python -r requirements-test.txt
+.venv-test/bin/python -m pytest -q
+```
+
+`python3 scripts/doctor.py` reports basic environment information without reading credentials. To compare audio generation, reuse the saved `input.json` and seed with automatic assistance disabled. Re-running Codex can change the prompt, lyrics, and duration. Different hardware, kernels, dependencies, or model revisions may produce different audio even with the same seed.
+
+## Data and connections
+
+Audio, lyrics, and settings normally live in `data/`, models in `models/`, and temporary files in `work/`. None are included in the repository. Back up `data/`, not just the audio files; it can also contain private YouTube connection information. After validating M4A/FLAC conversion, OTONI removes redundant WAV files. Deletion has no undo.
+
+LAN access is optional. OTONI does not provide multi-user authentication or per-user permissions and is not intended to be exposed directly to the public internet. See [connections and data (Japanese)](docs/SECURITY.md).
+
+## License and model terms
+
+OTONI's own code is available under the **[MIT License](LICENSE)**.
+
+**Consult each model's official license, model card, and accompanying notices for its terms of use.** Model weights, inference wheels, and external repositories are not bundled; setup retrieves them from their official sources. References are listed in [third-party notices (Japanese)](THIRD_PARTY_NOTICES.md).
+
+OTONI does not grant blanket permission or guarantees for publishing or commercially using generated music. Check the applicable model and service terms and the rights associated with your inputs and outputs. This also does not mean that every model license automatically applies unchanged to its outputs. OTONI's MIT license is separate from those terms.
+
+## Development and reports
+
+[Contributing (Japanese)](CONTRIBUTING.md) · [Release checklist (Japanese)](docs/RELEASE.md)
+
+For bug reports, include your OS, GPU, selected model, and steps to reproduce the error. Do not attach `.env`, authentication files, or entire folders of personal lyrics and generated music.
