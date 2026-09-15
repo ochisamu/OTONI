@@ -1,0 +1,27 @@
+.venv/
+.venv-ace/
+vendor/ACE-Step-1.5/
+models/
+data/
+work/
+vendor/*.whl
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+
+.venv-stable/
+vendor/stable-audio-3/
+
+# Local state and release products
+.cache/
+.env.*
+!.env.example
+web/quality/
+VALIDATION.md
+dist/
+*.log
+*.sqlite*
+*.pem
+*.key
+.DS_Store

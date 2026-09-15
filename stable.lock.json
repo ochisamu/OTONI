@@ -1,0 +1,6 @@
+{
+  "source": "779434a908193105335fd8d833418603625b2859",
+  "model": "stabilityai/stable-audio-3-medium",
+  "torch": "2.7.1+cu128",
+  "revision": "27b5a21b791b1b033d193a9e1e3ce78493f102f9"
+}
